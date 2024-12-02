@@ -1,9 +1,10 @@
 const express = require('express');
 const morgan=require('morgan');
 const mongoose=require('mongoose');
-const Blog=require('./models/blogs');
+const adminRoutes=require('./routes/adminRoutes');
+const blogRoutes=require('./routes/blogRoutes');
 const app = express();
-const dbURL='mongodb+srv://arda:13211100Arda.@cluster0.g93pw.mongodb.net/?retryWrites=true&w=majority&appName=node-blog';
+const dbURL='mongodb+srv://arda:199682Arda.@cluster0.g93pw.mongodb.net/?retryWrites=true&w=majority&appName=node-blog';
 
 mongoose.connect(dbURL)
 .then((result)=>app.listen(3000))
@@ -55,61 +56,13 @@ app.get('/single',(req,res)=>{
 
 app.get('/',(req,res)=>{
 
-    Blog.find().sort({createdAt:-1})
-        .then((result)=>{
-          res.render('index',{title:'Anasayfa',blogs:result});
-        })
-        .catch((err)=>{
-            console.log(err);
-        })
+    res.redirect('/blog');
 })
 
-app.get('/blog/:id',(req,res)=>{
-    const id= req.params.id;
-    Blog.findById(id)
-        .then((result)=>{
-            res.render('blog',{blog:result,title:'Detay'})
-        })
-        .catch((err)=>{
-            res.status(404).render('404',{title:'Sayfa Bulunamadı'});
-        })
-})
 
-app.get('/admin',(req,res)=>{
-    Blog.find().sort({createdAt:-1})
-    .then((result)=>{
-      res.render('admin',{title:'Admin',blogs:result});
-    })
-    .catch((err)=>{
-        console.log(err);
-    })
-})
+app.use('/blog',blogRoutes);
+app.use('/admin',adminRoutes);
 
-app.get('/admin/add',(req,res)=>{
-    res.render('add',{title:"Yeni yazi"})
-})
-
-app.post('/admin/add',(req,res)=>{
-    const blog = new Blog(req.body);
-    blog.save()
-        .then((result)=>{
-            res.redirect('/admin');
-        })
-        .catch((err)=>{
-            console.log(err);
-        })
-})
-
-app.delete('/admin/delete/:id',(req,res)=>{
-    const id=req.params.id;
-    Blog.findByIdAndDelete(id)
-        .then((result)=>{
-            res.json({link:'/admin'})
-        })
-        .catch((err)=>{
-            console.log(err);
-        })
-})
 
 app.get('/about',(req,res)=>{
     res.render('about',{title:'Hakkımızda'});
